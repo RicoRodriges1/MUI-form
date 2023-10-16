@@ -1,24 +1,50 @@
-import logo from './logo.svg';
-import './App.css';
+import { Button, Paper } from "@mui/material";
+import { Bill } from "./components/Bill";
+import React from 'react';
+
+let id = 1;
 
 function App() {
+  const [array, setArray] = React.useState([
+    {id: 1, filled: false, data: {
+      amount: "0.00",
+      account: "",
+      date: null,
+      payee: "",
+      repeat: "",
+      note: "",
+    }}
+  ]);
+  const [disabled, setDisabled] = React.useState(true)
+  
+
+  React.useEffect(() => {
+    console.log(array)
+    if(array.map(obj => obj.filled).every(value => value === true)) {
+      setDisabled(false)
+    } else {
+      setDisabled(true)
+    }
+  }, [array])
+
+  const handleAdd = () => {
+    setArray([...array, {id: ++id, filled: false, data: {
+      amount: "0.00",
+      account: "",
+      date: null,
+      payee: "",
+      repeat: "",
+      note: "",
+    }}])
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Paper sx={{ display: "flex", alignItems: "center", flexDirection: "column"}}>
+      {
+        array.map(bill => <Bill key={bill.id} id={bill.id} array={array} setArray={setArray}/>)
+      }
+      <Button onClick={handleAdd} disabled={disabled}>Add bill</Button>
+    </Paper>
   );
 }
 
