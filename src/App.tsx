@@ -1,11 +1,25 @@
 import { Button, Paper } from "@mui/material";
-import { Bill } from "./components/Bill";
+import { Bill } from "./components/Bill.tsx";
 import React from 'react';
 
 let id = 1;
 
+interface BillObject {
+  id: number,
+  filled: boolean,
+  data: {
+    amount: string,
+    account: string,
+    date: null | Date,
+    payee: string,
+    repeat: string,
+    note: string
+  }
+}
+
+
 function App() {
-  const [array, setArray] = React.useState([
+  const [array, setArray] = React.useState<BillObject[]>([
     {id: 1, filled: false, data: {
       amount: "0.00",
       account: "",

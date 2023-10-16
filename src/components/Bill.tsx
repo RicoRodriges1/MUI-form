@@ -1,25 +1,32 @@
 import { 
   Box, Grid, InputAdornment, InputLabel, 
   Select, FormControl, MenuItem, FormHelperText, 
-  TextField, Button } 
+  TextField, Button, SelectChangeEvent } 
   from "@mui/material";
 import React from "react";
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from "dayjs";
-import { AmountInput } from "./AmountInput";
+import { AmountInput } from "./AmountInput.tsx";
 
+interface Errors {
+  amount: boolean,
+  account: boolean,
+  payee: boolean,
+  repeat: boolean,
+  note: boolean,
+}
 
 export function Bill({id, setArray, array}) {
   const [accountId, setAccountId] = React.useState("");
   const [accountAmount, setAccountAmount] = React.useState("");
   const [payee, setPayee] = React.useState("");
-  const [date, setDate] = React.useState(null);
+  const [date, setDate] = React.useState<null | Date>(null);
   const [repeat, setRepeat] = React.useState("");
   const [note, setNote] = React.useState("");
   const [amount, setAmount] = React.useState("0.00");
-  const [errors, setErrors] = React.useState({
+  const [errors, setErrors] = React.useState<Errors>({
     amount: false,
     account: false,
     payee: false,
@@ -78,12 +85,18 @@ export function Bill({id, setArray, array}) {
     {id:3, value: "Every 3 Month, Untill"}
   ]
 
-  const handleChangeAccountId = (event) => {
+  const handleChangeAccountId = (event: SelectChangeEvent) => {
     setAccountId(event.target.value);
-    setAccountAmount(accounts.find(acc => acc.id === event.target.value).amount)
+    const obj = accounts.find(acc => acc.id === Number(event.target.value))
+    if (obj) {
+      setAccountAmount(String(obj.amount))
+    } else {
+      throw new Error("No such account")
+    }
+    
   };
 
-  const handleChangeAmount = (event) => {
+  const handleChangeAmount = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     setAmount(event.target.value);
   };
 
@@ -107,12 +120,11 @@ export function Bill({id, setArray, array}) {
         <InputLabel sx={{ color: "#9e9e9e", mx: "auto" }}>Amount</InputLabel>
         <Button onClick={handleDelete}>Delete</Button>
       </Box>
-      
       <FormControl>
         <AmountInput 
           value={amount} 
           onChange={handleChangeAmount} 
-          onBlur={() => !amount ? setErrors({...errors, amount: true}) : null}
+          onBlur={() => !amount ? setErrors({...errors, amount: true}) : setErrors({...errors, amount: false})}
         />
         <FormHelperText sx={{ color: "red", pb: 5}}>{errors.amount ? "Set an amount" : ""}</FormHelperText >
       </FormControl>
@@ -125,7 +137,7 @@ export function Bill({id, setArray, array}) {
               value={accountId}
               label="From account"
               onChange={handleChangeAccountId}
-              onBlur={() => !accountId ? setErrors({...errors, account: true}) : null}
+              onBlur={() => !accountId ? setErrors({...errors, account: true}) : setErrors({...errors, account: false})}
               endAdornment={
                 <InputAdornment position="end" sx={{ pr: "15px" }}>
                   ${accountAmount}
@@ -147,7 +159,7 @@ export function Bill({id, setArray, array}) {
               value={payee}
               label="Payee"
               onChange={e => setPayee(e.target.value)}
-              onBlur={() => !payee ? setErrors({...errors, payee: true}) : null}
+              onBlur={() => !payee ? setErrors({...errors, payee: true}) : setErrors({...errors, payee: false})}
             >
               {payees.map(acc => 
                 <MenuItem key={acc.id} value={acc.id}>{acc.name}</MenuItem>
@@ -172,7 +184,7 @@ export function Bill({id, setArray, array}) {
               value={repeat}
               label="Repeat"
               onChange={e => setRepeat(e.target.value)}
-              onBlur={() => !repeat ? setErrors({...errors, repeat: true}) : null}
+              onBlur={() => !repeat ? setErrors({...errors, repeat: true}) : setErrors({...errors, repeat: false})}
             >
               {frequencies.map(freq => 
                 <MenuItem key={freq.id} value={freq.value}>
@@ -191,7 +203,7 @@ export function Bill({id, setArray, array}) {
               label="Note"
               value={note}
               onChange={(event) => setNote(event.target.value)}
-              onBlur={() => !note ? setErrors({...errors, note: true}) : null}
+              onBlur={() => !note ? setErrors({...errors, note: true}) : setErrors({...errors, note: false})}
               inputProps={{
                 maxLength: 31
               }}
